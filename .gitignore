@@ -34,3 +34,44 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# React Native
+build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android
+android/app/build/
+android/.gradle/
+android/.idea/
+android/.settings/
+android/.cxx/
+android/local.properties
+android/.DS_Store
+android/app/debug.keystore
+
+# iOS
+ios/
+
+# VSCode
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Test coverage
+coverage/
+
+# Misc
+.env
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.patch

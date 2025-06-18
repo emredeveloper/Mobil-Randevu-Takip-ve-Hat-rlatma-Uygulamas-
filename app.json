@@ -1,7 +1,20 @@
 {
   "expo": {
-    "name": "MyFirstApp",
-    "slug": "MyFirstApp",
-    "version": "1.0.0"
+    "extra": {
+      "eas": {
+        "projectId": "ff59008e-0c44-4ff0-b45b-8ee024114a23"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ff59008e-0c44-4ff0-b45b-8ee024114a23"
+    },
+    "android": {
+      "runtimeVersion": "1.0.0"
+    },
+    "ios": {
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
+    }
   }
 }
