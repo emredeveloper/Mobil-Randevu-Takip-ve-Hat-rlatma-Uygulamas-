@@ -1,8 +1,8 @@
-Özet (Abstract)
+Özet
 ----------------
 Bu mobil uygulama, kullanıcıların randevularını kolayca takip edebilmesi ve zamanında hatırlatmalar alabilmesi amacıyla geliştirilmiştir. Uygulama, randevu ekleme, düzenleme, silme ve bildirim gönderme gibi temel işlevleri sunar. Tüm randevular cihazda kalıcı olarak **AsyncStorage** ile localde saklanır. React Native ve Expo altyapısı ile geliştirilen uygulama, kullanıcı dostu arayüzü ve kolay kullanımı ile öne çıkar. Proje kapsamında, kullanıcıların randevularını unutmaması ve günlük yaşamlarını daha verimli planlaması hedeflenmiştir.
 
-Giriş (Introduction)
+Giriş
 ---------------------
 Projenin amacı, kullanıcıların randevu ve önemli etkinliklerini unutmadan yönetebileceği, hatırlatıcı bildirimler alabileceği bir mobil uygulama sunmaktır. Özellikle yoğun iş temposuna sahip bireyler, öğrenciler ve sağlık takibi yapan hastalar için unutkanlık sorununa çözüm getirmek hedeflenmiştir. Hedef kitle; bireysel kullanıcılar, öğrenciler, çalışanlar ve sağlık takibi yapan hastalardır.
 
