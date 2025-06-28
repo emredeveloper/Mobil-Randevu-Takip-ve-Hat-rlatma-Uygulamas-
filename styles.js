@@ -108,4 +108,17 @@ const styles = StyleSheet.create({
   },
 });
 
+// Animasyonlu buton stili örneği
+export const animatedButton = {
+  backgroundColor: '#6200ee',
+  borderRadius: 10,
+  padding: 12,
+  alignItems: 'center',
+  marginVertical: 10,
+  shadowColor: '#000',
+  shadowOpacity: 0.15,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+};
+
 export default styles; 
