@@ -18,11 +18,19 @@ import * as ImagePicker from 'expo-image-picker';
 import AppointmentCard from './components/AppointmentCard';
 import CustomButton from './components/CustomButton';
 import InputField from './components/InputField';
+import LoadingScreen from './components/LoadingScreen';
+import SearchBar from './components/SearchBar';
+import DatePickerModal from './components/DatePickerModal';
+
+// Yeni ekranları import edelim
+import StatisticsScreen from './screens/StatisticsScreen';
+import CalendarScreen from './screens/CalendarScreen';
 
 // Utility fonksiyonları import edelim
 import { getAppointments, saveAppointments, validateAppointmentForm } from './utils/storage';
 import { getThemeColors } from './utils/theme';
 import { validateEmail, validatePassword, validateName } from './utils/validation';
+import { APPOINTMENT_CATEGORIES } from './utils/constants';
 
 // Bildirim ayarları
 Notifications.setNotificationHandler({
@@ -39,9 +47,11 @@ function HomeScreen({ onAddAppointment, theme }) {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePickerModal, setShowDatePickerModal] = useState(false);
   const [title, setTitle] = useState('');
   const [topic, setTopic] = useState('Sağlık');
   const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -114,6 +124,9 @@ function HomeScreen({ onAddAppointment, theme }) {
       Alert.alert('Hata', 'Lütfen bir başlık giriniz');
       return;
     }
+    
+    setIsLoading(true);
+    
     const newAppointment = {
       id: Math.random().toString(),
       title,
@@ -122,6 +135,7 @@ function HomeScreen({ onAddAppointment, theme }) {
       date: date.toISOString(),
       notificationId: null,
     };
+    
     try {
       // Bildirimi planla ve id'yi kaydet
       const notificationId = await scheduleLocalNotification(newAppointment);
@@ -129,11 +143,14 @@ function HomeScreen({ onAddAppointment, theme }) {
       onAddAppointment(newAppointment);
       setTitle('');
       setDescription('');
+      setDate(new Date());
       const formattedTime = new Date(date).toLocaleString('tr-TR');
       Alert.alert('Başarılı', `Randevu başarıyla eklendi.\nHatırlatma: ${formattedTime}`);
     } catch (error) {
       console.error('Hata:', error);
       Alert.alert('Hata', 'Randevu eklenirken bir hata oluştu');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,18 +193,18 @@ function HomeScreen({ onAddAppointment, theme }) {
           required={true}
           iconName="text-outline"
         />
-        <Text style={styles.inputLabel}>Konu</Text>
-        <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 5, marginBottom: 10, backgroundColor: '#f6f6fa', minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}>
+        <Text style={{ color: isDark ? '#ffd600' : '#6200ee', fontWeight: 'bold', marginBottom: 8 }}>Kategori</Text>
+        <View style={{ borderWidth: 1, borderColor: isDark ? '#333' : '#ddd', borderRadius: 8, marginBottom: 10, backgroundColor: isDark ? '#181a20' : '#f6f6fa', minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}>
           <Picker
             selectedValue={topic}
             onValueChange={(itemValue) => setTopic(itemValue)}
-            style={{ minHeight: 44, width: '100%' }}
-            itemStyle={{ fontSize: 16 }}
-            dropdownIconColor="#6200ee"
+            style={{ minHeight: 44, width: '100%', color: isDark ? '#fff' : '#333' }}
+            itemStyle={{ fontSize: 16, color: isDark ? '#fff' : '#333' }}
+            dropdownIconColor={isDark ? '#ffd600' : '#6200ee'}
           >
-            <Picker.Item label="Sağlık" value="Sağlık" />
-            <Picker.Item label="İş" value="İş" />
-            <Picker.Item label="Kişisel" value="Kişisel" />
+            {APPOINTMENT_CATEGORIES.map(category => (
+              <Picker.Item key={category.value} label={category.label} value={category.label} />
+            ))}
           </Picker>
         </View>
         <InputField
@@ -236,8 +253,26 @@ function HomeScreen({ onAddAppointment, theme }) {
           theme={theme}
           iconName="add-circle-outline"
           size="large"
+          loading={isLoading}
+          disabled={isLoading}
         />
       </View>
+      
+      <LoadingScreen 
+        visible={isLoading} 
+        message="Randevu ekleniyor..." 
+        theme={theme} 
+      />
+      
+      <DatePickerModal
+        visible={showDatePickerModal}
+        onClose={() => setShowDatePickerModal(false)}
+        onSelectDate={(selectedDate) => setDate(selectedDate)}
+        onSelectTime={(selectedTime) => setDate(selectedTime)}
+        initialDate={date}
+        theme={theme}
+        title="Randevu Tarihi ve Saati"
+      />
       {/* Randevu listesi modern kartlarla */}
       <FlatList
         data={[]}
@@ -268,6 +303,22 @@ function MyAppointmentsScreen({ appointments, onDelete, onEdit, theme }) {
   const [editDate, setEditDate] = useState(new Date());
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
   const [showEditTimePicker, setShowEditTimePicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredAppointments, setFilteredAppointments] = useState(appointments);
+
+  // Arama fonksiyonu
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredAppointments(appointments);
+    } else {
+      const filtered = appointments.filter(app =>
+        app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.topic?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredAppointments(filtered);
+    }
+  }, [searchQuery, appointments]);
 
   const handleEditOpen = (item) => {
     setEditData({ ...item });
@@ -288,8 +339,16 @@ function MyAppointmentsScreen({ appointments, onDelete, onEdit, theme }) {
       <View style={{ backgroundColor: isDark ? '#23242a' : '#fff', padding: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, alignItems: 'center' }}>
         <Text style={{ fontSize: 28, fontWeight: 'bold', color: isDark ? '#ffd600' : '#6200ee' }}>Randevularım</Text>
       </View>
+      
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Randevu ara..."
+        theme={theme}
+      />
+      
       <FlatList
-        data={appointments}
+        data={filteredAppointments}
         renderItem={({ item }) => (
           <AppointmentCard
             item={item}
@@ -299,7 +358,11 @@ function MyAppointmentsScreen({ appointments, onDelete, onEdit, theme }) {
           />
         )}
         keyExtractor={item => item.id}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: isDark ? '#bbb' : '#aaa', marginTop: 40, fontSize: 16 }}>Henüz kayıtlı randevunuz yok.</Text>}
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center', color: isDark ? '#bbb' : '#aaa', marginTop: 40, fontSize: 16 }}>
+            {searchQuery ? 'Arama kriterinize uygun randevu bulunamadı.' : 'Henüz kayıtlı randevunuz yok.'}
+          </Text>
+        }
       />
       {/* Düzenleme Modalı */}
       <Modal visible={editModalVisible} animationType="slide" transparent>
@@ -400,10 +463,10 @@ function ProfileScreen({ theme, user, setUser, onLogout }) {
   const isDark = theme === 'dark';
   const [editMode, setEditMode] = useState(false);
   const [profile, setProfile] = useState({
-    name: user?.name || 'Emre Karataş',
+    name: user?.name || 'Cihat Emre Karataş',
     age: user?.age || '23',
     email: user?.email || user?.email || '',
-    bio: user?.bio || '',
+    bio: user?.bio || 'Mobil uygulama geliştiricisi',
     photo: user?.photo || 'https://randomuser.me/api/portraits/men/32.jpg',
   });
   const pickImage = async () => {
@@ -513,7 +576,7 @@ function SettingsScreen({ theme, setTheme }) {
 
 // Mock kullanıcılar
 const defaultUsers = [
-  { email: 'test@mail.com', password: '123456', name: 'Test Kullanıcı', age: '25', bio: 'Deneme hesabı', photo: 'https://randomuser.me/api/portraits/men/32.jpg' }
+  { email: 'test@mail.com', password: '123456', name: 'Cihat Emre Karataş', age: '23', bio: 'Mobil uygulama geliştiricisi', photo: 'https://randomuser.me/api/portraits/men/32.jpg' }
 ];
 
 // Giriş/Kayıt Ekranı (mock, gerçekçi)
@@ -722,6 +785,10 @@ export default function App() {
               iconName = 'person-circle-outline';
             } else if (route.name === 'Randevularım') {
               iconName = 'list-circle-outline';
+            } else if (route.name === 'Takvim') {
+              iconName = 'calendar';
+            } else if (route.name === 'İstatistikler') {
+              iconName = 'analytics-outline';
             } else if (route.name === 'Premium') {
               iconName = 'star-outline';
             } else if (route.name === 'Ayarlar') {
@@ -743,11 +810,14 @@ export default function App() {
         <Tab.Screen name="Randevularım">
           {() => <MyAppointmentsScreen appointments={appointments} onDelete={handleDeleteAppointment} onEdit={handleEditAppointment} theme={theme} />}
         </Tab.Screen>
+        <Tab.Screen name="Takvim">
+          {() => <CalendarScreen appointments={appointments} theme={theme} />}
+        </Tab.Screen>
+        <Tab.Screen name="İstatistikler">
+          {() => <StatisticsScreen appointments={appointments} theme={theme} />}
+        </Tab.Screen>
         <Tab.Screen name="Profil">
           {() => <ProfileScreen theme={theme} user={user} setUser={setUser} onLogout={handleLogout} />}
-        </Tab.Screen>
-        <Tab.Screen name="Premium">
-          {() => <PremiumScreen theme={theme} />}
         </Tab.Screen>
         <Tab.Screen name="Ayarlar">
           {() => <SettingsScreen theme={theme} setTheme={setTheme} />}
