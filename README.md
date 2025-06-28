@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📅 MyFirstApp - Randevu Yönetim Uygulaması
 
 Modern ve kullanıcı dostu bir randevu yönetim uygulaması. React Native ve Expo ile geliştirilmiştir.
@@ -219,3 +220,13 @@ Bu proje MIT lisansı altında lisanslanmıştır.
 Herhangi bir sorunuz veya probleminiz varsa:
 - GitHub Issues kullanın
 - Email: support@myfirstapp.com 
+=======
+- Uygulamanın Expo üzerinden yayınlanan son haline aşağıdaki bağlantıdan ulaşabilirsiniz:
+
+  Expo Yayın Linki:
+  https://expo.dev/preview/update?message=ilk%20g%C3%BCncelleme&updateRuntimeVersion=1.0.0&createdAt=2025-06-02T10%3A35%3A14.538Z&slug=exp&projectId=ff59008e-0c44-4ff0-b45b-8ee024114a23&group=a67ce4bb-d624-4e41-b25d-0cafaa38424b
+
+- Ayrıca, aşağıdaki QR kodu telefonunuzun kamerası veya bir QR kod okuyucu ile tarayarak uygulamayı doğrudan açabilirsiniz:
+
+- Not: Uygulamayı açmak için Expo Go uygulamasının telefona yüklü olması gerekmektedir. 
+>>>>>>> 73a14867aa98b081735b9701766a631cb73c2716
